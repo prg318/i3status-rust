@@ -32,6 +32,7 @@
 //! `icon`      | A static icon  | Icon
 //! `artist`    | Current artist | Text
 //! `title`     | Current title  | Text
+//! `album`     | Current album  | Text
 //! `url`       | Current song url | Text
 //! `combo`     | Resolves to "`$artist[sep]$title"`, `"$artist"`, `"$title"`, or `"$url"` depending on what information is available. `[sep]` is set by `separator` option. | Text
 //! `player`    | Name of the current player (taken from the last part of its MPRIS bus name) | Text
@@ -208,6 +209,9 @@ pub async fn run(config: toml::Value, mut api: CommonApi) -> Result<()> {
                 if let Some(url) = &player.url {
                     values.insert("url".into(), Value::text(url.clone()));
                 }
+                if let Some(album) = &player.album {
+                    values.insert("album".into(), Value::text(album.clone()));
+                }
                 match (&player.title, &player.artist, &player.url) {
                     (Some(t), None, _) => {
                         values.insert("combo".into(), Value::text(t.clone()));
@@ -365,6 +369,7 @@ struct Player {
     title: Option<String>,
     artist: Option<String>,
     url: Option<String>,
+    album: Option<String>,
 }
 
 impl Player {
@@ -396,6 +401,7 @@ impl Player {
             title: metadata.title(),
             artist: metadata.artist(),
             url: metadata.url(),
+            album: metadata.album(),
         })
     }
 
@@ -403,6 +409,7 @@ impl Player {
         self.title = metadata.title();
         self.artist = metadata.artist();
         self.url = metadata.url();
+        self.album = metadata.album();
     }
 
     async fn play_pause(&self) -> Result<()> {
